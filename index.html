@@ -1,0 +1,83 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>امتحان الحاسوب - جامعة المأمون</title>
+<style>
+body{margin:0;background:#08172d;color:#edf3ff;font-family:Tahoma,Arial;line-height:1.7}.wrap{max-width:950px;margin:auto;padding:18px}.card{background:#0e2444;border:1px solid #29486e;border-radius:16px;padding:22px;margin:12px 0}.hidden{display:none!important}h1,h2{color:#f1cf87}input,button{font:inherit;border-radius:9px;padding:12px;border:1px solid #55749c}input{width:100%;box-sizing:border-box;background:#08172d;color:white;margin:7px 0}button{cursor:pointer;background:#d4af63;color:#08172d;font-weight:bold;margin:5px}.danger{background:#b84444;color:white}.option{display:block;background:#08172d;padding:12px;margin:9px 0;border:1px solid #29486e;border-radius:10px;cursor:pointer}.option input{width:auto;margin-left:10px}.top{display:flex;justify-content:space-between;gap:10px;align-items:center}.timer{color:#f1cf87;font-weight:bold;font-size:20px}.chat{height:240px;overflow:auto;background:#08172d;border:1px solid #29486e;border-radius:10px;padding:10px}.msg{padding:7px;margin:6px 0;background:#173861;border-radius:8px}.msg b{color:#f1cf87}.row{display:flex;gap:8px}.row input{flex:1}.note{color:#aab9d3}.q{font-size:18px}.admin{background:#142e52}
+</style></head><body><div class="wrap">
+<section id="login" class="card"><h1>جامعة المأمون — امتحان الحاسوب</h1><p class="note">30 سؤال اختيار من متعدد — 60 درجة — 30 دقيقة</p><label>اسم الطالب الكامل</label><input id="name" autocomplete="name" placeholder="اكتب اسمك هنا"><button onclick="startExam()">بدء الامتحان</button><button onclick="adminLogin()">دخول المدير</button><hr><h2>الشات العام</h2><div id="publicChat1" class="chat"></div><div class="row"><input id="chatInput1" placeholder="اكتب رسالة عامة"><input type="file" id="file1" style="width:130px"><button onclick="sendChat('chatInput1','', 'file1')">إرسال</button></div></section>
+<section id="exam" class="card hidden"><div class="top"><div><h2>امتحان الحاسوب</h2><span id="who"></span></div><div id="timer" class="timer">30:00</div></div><div id="progress"></div><div id="question"></div><div class="top"><button onclick="prev()">السابق</button><button class="danger" onclick="finishExam()">إنهاء وتسليم الامتحان</button><button onclick="next()">التالي</button></div><hr><h2>الشات العام</h2><div id="publicChat2" class="chat"></div><div class="row"><input id="chatInput2" placeholder="رسالة عامة"><input type="file" id="file2" style="width:130px"><button onclick="sendChat('chatInput2','', 'file2')">إرسال</button></div></section>
+<section id="done" class="card hidden"><h1>تم تسليم امتحانك بنجاح</h1><p>تم إرسال إجاباتك إلى الإدارة. النتيجة غير ظاهرة للطلاب.</p><h2>الشات العام</h2><div id="publicChat3" class="chat"></div><div class="row"><input id="chatInput3" placeholder="رسالة عامة"><input type="file" id="file3" style="width:130px"><button onclick="sendChat('chatInput3','', 'file3')">إرسال</button></div></section>
+<section id="admin" class="card hidden"><h1>لوحة الإدارة</h1><button class="danger" onclick="location.reload()">خروج</button><h2>نتائج الطلاب (للمدير فقط)</h2><div id="results"></div><button onclick="clearResults()">مسح النتائج</button><h2>الشات العام</h2><div id="publicChat4" class="chat"></div><div class="row"><input id="chatInput4" placeholder="اكتب رسالة عامة كمدير"><input type="file" id="file4" style="width:130px"><button onclick="sendChat('chatInput4','المدير','file4')">إرسال</button></div></section>
+</div><script>
+const Q=[
+["What is an operating system?","ما هو نظام التشغيل؟",["برنامج ألعاب","الواجهة الرئيسية بين المستخدم والحاسوب","برنامج طباعة","متصفح"],1],
+["Which is an operating system?","أي مما يلي نظام تشغيل؟",["Windows 11","Microsoft Word","Chrome","PowerPoint"],0],
+["CPU means:","ماذا تعني CPU؟",["Central Processing Unit","Computer Program Unit","Central Print Unit","Control Personal Unit"],0],
+["RAM is:","RAM هي:",["ذاكرة مؤقتة","قرص دائم","طابعة","برنامج"],0],
+["Which is an input device?","أي جهاز إدخال؟",["Keyboard","Monitor","Printer","Speaker"],0],
+["Which is an output device?","أي جهاز إخراج؟",["Monitor","Mouse","Keyboard","Scanner"],0],
+["Word is used for:","يستخدم Word من أجل:",["Creating documents","تشغيل النظام","فحص الفيروسات","إدارة الشبكة"],0],
+["Word document extension:","امتداد مستند Word:",[".docx",".jpg",".mp3",".exe"],0],
+["Ctrl + C means:","Ctrl + C تعني:",["Copy","Cut","Paste","Save"],0],
+["Ctrl + V means:","Ctrl + V تعني:",["Paste","Copy","Save","Undo"],0],
+["Ctrl + X means:","Ctrl + X تعني:",["Cut","Copy","Paste","Print"],0],
+["Ctrl + S means:","Ctrl + S تعني:",["Save","Search","Send","Select"],0],
+["Font tools are in:","أدوات الخط موجودة في:",["Home","Insert","View","Review"],0],
+["Bold means:","Bold تعني:",["Thick text","Slanted text","Deleted text","Small text"],0],
+["Italic means:","Italic تعني:",["Slanted text","Thick text","Centered text","Underlined text"],0],
+["Underline:","Underline:",["Adds line under text","Deletes text","Copies text","Prints text"],0],
+["Pictures are added from:","تضاف الصور من:",["Insert","Home","File","View"],0],
+["Firewall helps to:","Firewall يساعد على:",["Protect network","Print files","Write documents","Increase RAM"],0],
+["Antivirus is used to:","يستخدم Antivirus من أجل:",["Detect malware","Create files","Draw images","Format text"],0],
+["IP address identifies:","عنوان IP يعرّف:",["A device on network","A Word file","A printer ink","A keyboard"],0],
+["Windows Settings is for:","إعدادات Windows تستخدم لـ:",["Changing system settings","Writing only","Playing only","Scanning only"],0],
+["Snap Layouts helps:","Snap Layouts تساعد على:",["Arrange windows","Delete Windows","Print photos","Install virus"],0],
+["Minimize means:","Minimize تعني:",["Hide to taskbar","Close permanently","Maximize","Delete"],0],
+["Maximize means:","Maximize تعني:",["Make window full screen","Hide window","Delete window","Copy window"],0],
+["Recycle Bin contains:","سلة المحذوفات تحتوي:",["Deleted files temporarily","Passwords","RAM","Internet"],0],
+["Desktop is:","سطح المكتب هو:",["Main screen area","Printer","Keyboard","Virus"],0],
+["A file is:","الملف هو:",["Stored data","Only a folder","A monitor","A network"],0],
+["A folder is used to:","المجلد يستخدم لـ:",["Organize files","Print pages","Run CPU","Connect mouse"],0],
+["Internet browser example:","مثال على متصفح الإنترنت:",["Google Chrome","Windows","Word","RAM"],0],
+["Password should be:","كلمة المرور يجب أن تكون:",["Strong and private","Shared with everyone","Very short only","Your name only"],0]];
+let i=0,ans=Array(30).fill(null),student='',left=1800,tick;
+function show(id){document.querySelectorAll('section').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');renderChats()}
+function startExam(){student=document.getElementById('name').value.trim();if(!student){alert('اكتب اسم الطالب أولاً');return}document.getElementById('who').textContent='الطالب: '+student;show('exam');render();tick=setInterval(()=>{left--;document.getElementById('timer').textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');if(left<=0)finishExam()},1000)}
+function render(){let q=Q[i];document.getElementById('progress').textContent=`السؤال ${i+1} من 30`;document.getElementById('question').innerHTML=`<div class=q><b>${q[0]}</b><br><span class=note>${q[1]}</span></div>`+q[2].map((x,n)=>`<label class=option><input type=radio name=q ${ans[i]===n?'checked':''} onchange="ans[${i}]=${n}">${x}</label>`).join('')}
+function next(){if(i<29){i++;render()}}function prev(){if(i>0){i--;render()}}
+function finishExam(){if(!student)return; if(!confirm('هل تريد تسليم الامتحان؟'))return;clearInterval(tick);let score=ans.reduce((s,a,n)=>s+(a===Q[n][3]?2:0),0);let r=JSON.parse(localStorage.getItem('mamounResults')||'[]');r.push({name:student,score,date:new Date().toLocaleString(),answers:ans});localStorage.setItem('mamounResults',JSON.stringify(r));show('done')}
+function adminLogin(){let p=prompt('كلمة مرور المدير');if(p==='pool'){show('admin');renderResults()}else if(p!==null)alert('كلمة المرور غير صحيحة')}
+function renderResults(){let r=JSON.parse(localStorage.getItem('mamounResults')||'[]');document.getElementById('results').innerHTML=r.length?r.map(x=>`<div class="msg admin"><b>${x.name}</b> — الدرجة: ${x.score}/60<br><small>${x.date}</small></div>`).join(''):'لا توجد نتائج بعد'}
+function clearResults(){if(confirm('مسح جميع النتائج؟')){localStorage.removeItem('mamounResults');renderResults()}}
+function sendChat(id,who,fileId){
+ let t=document.getElementById(id).value.trim();
+ let sender=who||student;
+ if(!sender){alert('يجب إدخال اسم الطالب وبدء الامتحان قبل إرسال أي رسالة.');return}
+ let f=fileId?document.getElementById(fileId).files[0]:null;
+ if(!t&&!f)return;
+ let a=JSON.parse(localStorage.getItem('mamounChat')||'[]');
+ function save(fileData){
+   a.push({id:Date.now()+Math.random(),who:sender,text:t,file:fileData});
+   localStorage.setItem('mamounChat',JSON.stringify(a));document.getElementById(id).value='';
+   if(fileId)document.getElementById(fileId).value='';renderChats()
+ }
+ if(f){
+   if(f.size>700000){alert('الملف كبير. الحد في هذه النسخة 700KB.');return}
+   let r=new FileReader();r.onload=()=>save({name:f.name,type:f.type,data:r.result});r.readAsDataURL(f)
+ }else save(null)
+}
+function deleteChat(id){
+ if(!confirm('حذف هذه الرسالة؟'))return;
+ let a=JSON.parse(localStorage.getItem('mamounChat')||'[]').filter(x=>x.id!==id);
+ localStorage.setItem('mamounChat',JSON.stringify(a));renderChats()
+}
+function renderChats(){
+ let a=JSON.parse(localStorage.getItem('mamounChat')||'[]');
+ let h=a.map(x=>{
+  let text=(x.text||'').replace(/</g,'&lt;');
+  let att=x.file?`<br><a href="${x.file.data}" download="${x.file.name}" style="color:#f1cf87">📎 ${x.file.name}</a>`:'';
+  let del=`<button style="float:left;padding:3px 7px;font-size:11px" onclick="deleteChat(${x.id})">حذف</button>`;
+  return `<div class=msg><b>${x.who}:</b> ${text}${att}${del}</div>`
+ }).join('')||'<span class=note>لا توجد رسائل بعد.</span>';
+ ['publicChat1','publicChat2','publicChat3','publicChat4'].forEach(id=>{let e=document.getElementById(id);if(e){e.innerHTML=h;e.scrollTop=e.scrollHeight}})
+}
+renderChats();
+</script></body></html>
